@@ -42,6 +42,9 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
     return redirect(url_for('index'))
+@app.route('/calendar')
+def calendar():
+    return render_template('Booking_calendar.html')
 
 # Создаём таблицы
 with app.app_context():
