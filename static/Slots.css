@@ -1,47 +1,25 @@
-/* Slots.css */
-
-#slots-container {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: fit-content;
-    max-width: 90%;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-#slots-container h3 {
-    text-align: center;
-    color: #333;
-}
-
-#slots {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
-
-.slot {
-    padding: 10px 20px;
-    background-color: #e0f7fa;
-    border: 1px solid #00bcd4;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
+/* Slots and Services Specific Styles */
+.slot, .service {
+    display: inline-block;
+    margin: 5px;
+    padding: 10px 15px;
     font-size: 14px;
-    transition: background-color 0.2s ease-in-out;
+    border-radius: 20px;
+    border: 2px solid #007bff;
+    background-color: white;
+    color: #007bff;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.slot:hover {
-    background-color: #b2ebf2;
+.slot:hover, .service:hover {
+    background-color: #007bff;
+    color: white;
 }
 
 .slot.booked {
-    background-color: #ffcdd2;
-    border-color: #f44336;
-    color: #000000;
-    cursor: not-allowed;
+    background-color: #ff6b6b;
+    color: white;
+    border: 2px solid #ff6b6b;
+    pointer-events: none;
 }

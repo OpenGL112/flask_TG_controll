@@ -14,14 +14,8 @@
             <span id="month-year">December 2024</span>
             <button id="next-month">&gt;</button>
         </div>
-        <div class="calendar-days">
-            <div class="day-label">Sun</div>
-            <div class="day-label">Mon</div>
-            <div class="day-label">Tue</div>
-            <div class="day-label">Wed</div>
-            <div class="day-label">Thu</div>
-            <div class="day-label">Fri</div>
-            <div class="day-label">Sat</div>
+        <div class="calendar-days" id="calendar-days">
+            <!-- Days will be generated dynamically -->
         </div>
     </div>
 
@@ -30,30 +24,48 @@
         <div id="slots"></div>
     </div>
 
+    <div id="services-container" style="display: none;">
+        <h3>Choose a Service</h3>
+        <div id="services"></div>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const calendarDays = document.querySelector('.calendar-days');
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarDays = document.getElementById('calendar-days');
             const monthYear = document.getElementById('month-year');
             const prevMonth = document.getElementById('prev-month');
             const nextMonth = document.getElementById('next-month');
-
             const slotsContainer = document.getElementById('slots-container');
             const slotsDiv = document.getElementById('slots');
+            const servicesContainer = document.getElementById('services-container');
+            const servicesDiv = document.getElementById('services');
 
             let currentDate = new Date();
 
-            function generateCalendar(date) {
+            async function fetchDates() {
+                try {
+                    const response = await fetch('/api/dates');
+                    const dates = await response.json();
+                    renderCalendar(dates);
+                } catch (error) {
+                    console.error('Error fetching dates:', error);
+                    alert('Failed to load dates.');
+                }
+            }
+
+            function renderCalendar(dates) {
                 calendarDays.innerHTML = '';
-
-                const year = date.getFullYear();
-                const month = date.getMonth();
-
-                monthYear.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
                 const firstDay = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
+
+                monthYear.textContent = currentDate.toLocaleString('default', {
+                    month: 'long',
+                    year: 'numeric'
+                });
 
                 for (let i = 0; i < firstDay; i++) {
                     const emptySlot = document.createElement('div');
@@ -71,8 +83,12 @@
 
                     if (dayDate < today) {
                         dayElement.classList.add('disabled');
+                    } else if (dates.includes(dayDate.toISOString().split('T')[0])) {
+                        dayElement.addEventListener('click', () =>
+                            fetchSlots(dayDate)
+                        );
                     } else {
-                        dayElement.addEventListener('click', () => fetchSlots(dayDate));
+                        dayElement.classList.add('disabled');
                     }
 
                     calendarDays.appendChild(dayElement);
@@ -81,21 +97,23 @@
 
             async function fetchSlots(date) {
                 try {
-                    const response = await fetch(`/api/slots?date=${date.toISOString()}`);
+                    const response = await fetch(
+                        `/api/slots?date=${date.toISOString().split('T')[0]}`
+                    );
                     const slots = await response.json();
-
                     displaySlots(slots);
                 } catch (error) {
                     console.error('Error fetching slots:', error);
-                    alert('Failed to load slots. Please try again later.');
+                    alert('Failed to load slots.');
                 }
             }
 
             function displaySlots(slots) {
                 slotsContainer.style.display = 'block';
+                servicesContainer.style.display = 'none';
                 slotsDiv.innerHTML = '';
 
-                slots.forEach(slot => {
+                slots.forEach((slot) => {
                     const slotElement = document.createElement('div');
                     slotElement.className = 'slot';
                     slotElement.textContent = slot.time;
@@ -103,23 +121,78 @@
                     if (slot.booked) {
                         slotElement.classList.add('booked');
                         slotElement.style.pointerEvents = 'none';
+                    } else {
+                        slotElement.addEventListener('click', () =>
+                            fetchServices(slot.id)
+                        );
                     }
 
                     slotsDiv.appendChild(slotElement);
                 });
             }
 
+            async function fetchServices(slotId) {
+                try {
+                    const response = await fetch('/api/services');
+                    const services = await response.json();
+                    displayServices(slotId, services);
+                } catch (error) {
+                    console.error('Error fetching services:', error);
+                    alert('Failed to load services.');
+                }
+            }
+
+            function displayServices(slotId, services) {
+                servicesContainer.style.display = 'block';
+                servicesDiv.innerHTML = '';
+
+                services.forEach((service) => {
+                    const serviceElement = document.createElement('div');
+                    serviceElement.className = 'service';
+                    serviceElement.textContent = service.name;
+
+                    serviceElement.addEventListener('click', () =>
+                        bookSlot(slotId, service.id)
+                    );
+
+                    servicesDiv.appendChild(serviceElement);
+                });
+            }
+
+            async function bookSlot(slotId, serviceId) {
+                try {
+                    const response = await fetch('/api/book', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ slot_id: slotId, service_id: serviceId })
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert(result.message);
+                        slotsContainer.style.display = 'none';
+                        servicesContainer.style.display = 'none';
+                        fetchDates();
+                    } else {
+                        alert(result.error);
+                    }
+                } catch (error) {
+                    console.error('Error booking slot:', error);
+                    alert('Failed to book slot.');
+                }
+            }
+
             prevMonth.addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
-                generateCalendar(currentDate);
+                fetchDates();
             });
 
             nextMonth.addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() + 1);
-                generateCalendar(currentDate);
+                fetchDates();
             });
 
-            generateCalendar(currentDate);
+            fetchDates();
         });
     </script>
 </body>
