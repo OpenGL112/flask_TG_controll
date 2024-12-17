@@ -31,169 +31,194 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const calendarDays = document.getElementById('calendar-days');
-            const monthYear = document.getElementById('month-year');
-            const prevMonth = document.getElementById('prev-month');
-            const nextMonth = document.getElementById('next-month');
-            const slotsContainer = document.getElementById('slots-container');
-            const slotsDiv = document.getElementById('slots');
-            const servicesContainer = document.getElementById('services-container');
-            const servicesDiv = document.getElementById('services');
+    const calendarDays = document.getElementById('calendar-days');
+    const monthYear = document.getElementById('month-year');
+    const prevMonth = document.getElementById('prev-month');
+    const nextMonth = document.getElementById('next-month');
+    const slotsContainer = document.getElementById('slots-container');
+    const slotsDiv = document.getElementById('slots');
+    const servicesContainer = document.getElementById('services-container');
+    const servicesDiv = document.getElementById('services');
 
-            let currentDate = new Date();
+    let currentDate = new Date();
 
-            async function fetchDates() {
-                try {
-                    const response = await fetch('/api/dates');
-                    const dates = await response.json();
-                    renderCalendar(dates);
-                } catch (error) {
-                    console.error('Error fetching dates:', error);
-                    alert('Failed to load dates.');
-                }
-            }
+    // Скрыть всплывающие окна
+    function hidePopups() {
+        slotsContainer.style.display = 'none';
+        servicesContainer.style.display = 'none';
+    }
 
-            function renderCalendar(dates) {
-                calendarDays.innerHTML = '';
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth();
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+    // Обработчик клика на document для скрытия попапов
+    document.addEventListener('click', function (event) {
+        // Проверяем, кликнули ли на элементы внутри попапов
+        if (
+            !slotsContainer.contains(event.target) &&
+            !servicesContainer.contains(event.target)
+        ) {
+            hidePopups();
+        }
+    });
 
-                monthYear.textContent = currentDate.toLocaleString('default', {
-                    month: 'long',
-                    year: 'numeric'
-                });
+    async function fetchDates() {
+        try {
+            const response = await fetch('/api/dates');
+            const dates = await response.json();
+            renderCalendar(dates);
+        } catch (error) {
+            console.error('Error fetching dates:', error);
+            alert('Failed to load dates.');
+        }
+    }
 
-                for (let i = 0; i < firstDay; i++) {
-                    const emptySlot = document.createElement('div');
-                    emptySlot.className = 'day disabled';
-                    calendarDays.appendChild(emptySlot);
-                }
+    function renderCalendar(dates) {
+        calendarDays.innerHTML = '';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dayElement = document.createElement('div');
-                    dayElement.className = 'day';
-                    dayElement.textContent = day;
-
-                    const dayDate = new Date(year, month, day);
-                    dayDate.setHours(0, 0, 0, 0);
-
-                    if (dayDate < today) {
-                        dayElement.classList.add('disabled');
-                    } else if (dates.includes(dayDate.toISOString().split('T')[0])) {
-                        dayElement.addEventListener('click', () =>
-                            fetchSlots(dayDate)
-                        );
-                    } else {
-                        dayElement.classList.add('disabled');
-                    }
-
-                    calendarDays.appendChild(dayElement);
-                }
-            }
-
-            async function fetchSlots(date) {
-                try {
-                    const response = await fetch(
-                        `/api/slots?date=${date.toISOString().split('T')[0]}`
-                    );
-                    const slots = await response.json();
-                    displaySlots(slots);
-                } catch (error) {
-                    console.error('Error fetching slots:', error);
-                    alert('Failed to load slots.');
-                }
-            }
-
-            function displaySlots(slots) {
-                slotsContainer.style.display = 'block';
-                servicesContainer.style.display = 'none';
-                slotsDiv.innerHTML = '';
-
-                slots.forEach((slot) => {
-                    const slotElement = document.createElement('div');
-                    slotElement.className = 'slot';
-                    slotElement.textContent = slot.time;
-
-                    if (slot.booked) {
-                        slotElement.classList.add('booked');
-                        slotElement.style.pointerEvents = 'none';
-                    } else {
-                        slotElement.addEventListener('click', () =>
-                            fetchServices(slot.id)
-                        );
-                    }
-
-                    slotsDiv.appendChild(slotElement);
-                });
-            }
-
-            async function fetchServices(slotId) {
-                try {
-                    const response = await fetch('/api/services');
-                    const services = await response.json();
-                    displayServices(slotId, services);
-                } catch (error) {
-                    console.error('Error fetching services:', error);
-                    alert('Failed to load services.');
-                }
-            }
-
-            function displayServices(slotId, services) {
-                servicesContainer.style.display = 'block';
-                servicesDiv.innerHTML = '';
-
-                services.forEach((service) => {
-                    const serviceElement = document.createElement('div');
-                    serviceElement.className = 'service';
-                    serviceElement.textContent = service.name;
-
-                    serviceElement.addEventListener('click', () =>
-                        bookSlot(slotId, service.id)
-                    );
-
-                    servicesDiv.appendChild(serviceElement);
-                });
-            }
-
-            async function bookSlot(slotId, serviceId) {
-                try {
-                    const response = await fetch('/api/book', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ slot_id: slotId, service_id: serviceId })
-                    });
-
-                    const result = await response.json();
-                    if (response.ok) {
-                        alert(result.message);
-                        slotsContainer.style.display = 'none';
-                        servicesContainer.style.display = 'none';
-                        fetchDates();
-                    } else {
-                        alert(result.error);
-                    }
-                } catch (error) {
-                    console.error('Error booking slot:', error);
-                    alert('Failed to book slot.');
-                }
-            }
-
-            prevMonth.addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                fetchDates();
-            });
-
-            nextMonth.addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                fetchDates();
-            });
-
-            fetchDates();
+        monthYear.textContent = currentDate.toLocaleString('default', {
+            month: 'long',
+            year: 'numeric'
         });
+
+        for (let i = 0; i < firstDay; i++) {
+            const emptySlot = document.createElement('div');
+            emptySlot.className = 'day disabled';
+            calendarDays.appendChild(emptySlot);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'day';
+            dayElement.textContent = day;
+
+            const dayDate = new Date(year, month, day);
+            dayDate.setHours(0, 0, 0, 0);
+
+            if (dayDate < today) {
+                dayElement.classList.add('disabled');
+            } else {
+                dayElement.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Остановить всплытие события, чтобы document не закрыл попап
+                    if (dates.includes(dayDate.toISOString().split('T')[0])) {
+                        fetchSlots(dayDate);
+                    } else {
+                        alert('Свободных слотов для записи нет!');
+                    }
+                });
+            }
+
+            calendarDays.appendChild(dayElement);
+        }
+    }
+
+    async function fetchSlots(date) {
+        try {
+            const response = await fetch(
+                `/api/slots?date=${date.toISOString().split('T')[0]}`
+            );
+            const slots = await response.json();
+            displaySlots(slots);
+        } catch (error) {
+            console.error('Error fetching slots:', error);
+            alert('Failed to load slots.');
+        }
+    }
+
+    function displaySlots(slots) {
+    slotsContainer.style.display = 'block';
+    servicesContainer.style.display = 'none';
+    slotsDiv.innerHTML = '';
+
+    slots.forEach((slot) => {
+        const slotElement = document.createElement('div');
+        slotElement.className = 'slot';
+        slotElement.textContent = slot.time;
+
+        // Приводим к булевому значению
+        const isBooked = slot.booked === true || slot.booked === "true";
+
+        if (isBooked) {
+            slotElement.classList.add('booked');
+            slotElement.style.pointerEvents = 'none';
+        } else {
+            slotElement.addEventListener('click', (event) => {
+                event.stopPropagation(); // Остановить всплытие события
+                fetchServices(slot.id);
+            });
+        }
+
+        slotsDiv.appendChild(slotElement);
+    });
+}
+
+    async function fetchServices(slotId) {
+        try {
+            const response = await fetch('/api/services');
+            const services = await response.json();
+            displayServices(slotId, services);
+        } catch (error) {
+            console.error('Error fetching services:', error);
+            alert('Failed to load services.');
+        }
+    }
+
+    function displayServices(slotId, services) {
+        servicesContainer.style.display = 'block';
+        servicesDiv.innerHTML = '';
+
+        services.forEach((service) => {
+            const serviceElement = document.createElement('div');
+            serviceElement.className = 'service';
+            serviceElement.textContent = service.name;
+
+            serviceElement.addEventListener('click', (event) => {
+                event.stopPropagation(); // Остановить всплытие события
+                bookSlot(slotId, service.id);
+            });
+
+            servicesDiv.appendChild(serviceElement);
+        });
+    }
+
+    async function bookSlot(slotId, serviceId) {
+        try {
+            const response = await fetch('/api/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slot_id: slotId, service_id: serviceId })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                hidePopups();
+                fetchDates();
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            console.error('Error booking slot:', error);
+            alert('Failed to book slot.');
+        }
+    }
+
+    prevMonth.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        fetchDates();
+    });
+
+    nextMonth.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        fetchDates();
+    });
+
+    fetchDates();
+});
+
     </script>
 </body>
 </html>

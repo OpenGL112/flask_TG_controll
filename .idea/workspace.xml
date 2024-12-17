@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="626d0790-ac4f-44b3-ad85-08bebf7da6cf" name="Changes" comment="App V0.0.3 (Calendar has been updated)">
+    <list default="true" id="626d0790-ac4f-44b3-ad85-08bebf7da6cf" name="Changes" comment="App V0.0.4 (New booking logic)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/Calendar.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/Calendar.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/Slots.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/Slots.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/instance/booking_system.db" beforeDir="false" afterPath="$PROJECT_DIR$/instance/booking_system.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/Booking_calendar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Booking_calendar.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -118,7 +118,8 @@
       <workItem from="1734015611155" duration="4102000" />
       <workItem from="1734087603670" duration="12398000" />
       <workItem from="1734361221292" duration="2520000" />
-      <workItem from="1734363773218" duration="310000" />
+      <workItem from="1734363773218" duration="412000" />
+      <workItem from="1734436264656" duration="7341000" />
     </task>
     <task id="LOCAL-00001" summary="Test app V0.0.1">
       <option name="closed" value="true" />
@@ -168,7 +169,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734103449968</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="App V0.0.4 (New booking logic)">
+      <option name="closed" value="true" />
+      <created>1734364172841</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1734364172841</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -190,9 +199,10 @@
     <MESSAGE value="App V0.0.1" />
     <MESSAGE value="App V0.0.2 (Calendar has been added)" />
     <MESSAGE value="App V0.0.3 (Calendar has been updated)" />
-    <option name="LAST_COMMIT_MESSAGE" value="App V0.0.3 (Calendar has been updated)" />
+    <MESSAGE value="App V0.0.4 (New booking logic)" />
+    <option name="LAST_COMMIT_MESSAGE" value="App V0.0.4 (New booking logic)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/flask_TG_controll$flask_TG_controll.coverage" NAME="flask_TG_controll Coverage Results" MODIFIED="1734364082331" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/flask_TG_controll$flask_TG_controll.coverage" NAME="flask_TG_controll Coverage Results" MODIFIED="1734445461196" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -24,14 +24,18 @@ def get_available_slots(date):
             # Формируем список слотов с нужным форматом времени и состоянием booked как True/False
             slots = []
             for time, booker in rows:
-                # Форматируем время, если это необходимо (например, "21:00 - 22:00")
-                # Предположим, что в поле `time` у вас уже хранится нужный формат, например, '21:00'
-                slot_time = f"{time} - {str(int(time.split(':')[0]) + 1)}:{time.split(':')[1]}"
+                # Логирование для отладки
+                print(f"Time: {time}, Booker: {booker}")
 
-                # Добавляем слот в список с состоянием booked
+                # Форматируем время (например, "21:00 - 22:00")
+                hour, minute = map(int, time.split(':'))
+                slot_time = f"{hour:02}:{minute:02} - {hour + 1:02}:{minute:02}"
+
+                # Определяем состояние booked
+                is_booked = booker is not None and booker.strip() != ""
                 slots.append({
                     "time": slot_time,
-                    "booked": bool(booker)  # True, если слот занят, False если свободен
+                    "booked": is_booked  # True, если слот занят, False если свободен
                 })
 
             # Возвращаем результат в формате JSON

@@ -18,7 +18,7 @@ class Slot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.String(10), nullable=False)
-    booked = db.Column(db.Boolean, default=False)
+    booked = db.Column(db.Integer, nullable = False,default=0)
 
 
 class Service(db.Model):
@@ -58,6 +58,11 @@ def get_slots():
         slots = Slot.query.filter_by(date=requested_date).all()
         if not slots:
             return jsonify({"message": "No available slots for this date."}), 404
+
+        print([
+            {"id": slot.id, "time": slot.time, "booked": slot.booked}
+            for slot in slots
+        ])
 
         return jsonify([
             {"id": slot.id, "time": slot.time, "booked": slot.booked}
