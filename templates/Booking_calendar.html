@@ -103,10 +103,14 @@
             } else {
                 dayElement.addEventListener('click', (event) => {
                     event.stopPropagation(); // Остановить всплытие события, чтобы document не закрыл попап
+                    hidePopups();
                     if (dates.includes(dayDate.toISOString().split('T')[0])) {
                         fetchSlots(dayDate);
                     } else {
+                        setTimeout(() => {
                         alert('Свободных слотов для записи нет!');
+                        }, 10); // Small delay of 10ms
+                        hidePopups();
                     }
                 });
             }
@@ -139,8 +143,8 @@
         slotElement.textContent = slot.time;
 
         // Приводим к булевому значению
-        const isBooked = slot.booked === true || slot.booked === "true";
-
+        const isBooked = slot.booked === 1 || slot.booked === "1";
+        console.log(slot.booked)
         if (isBooked) {
             slotElement.classList.add('booked');
             slotElement.style.pointerEvents = 'none';
@@ -196,7 +200,7 @@
             if (response.ok) {
                 alert(result.message);
                 hidePopups();
-                fetchDates();
+                await fetchDates();
             } else {
                 alert(result.error);
             }
