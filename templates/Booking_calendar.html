@@ -71,53 +71,61 @@
     }
 
     function renderCalendar(dates) {
-        calendarDays.innerHTML = '';
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+    calendarDays.innerHTML = '';
 
-        monthYear.textContent = currentDate.toLocaleString('default', {
-            month: 'long',
-            year: 'numeric'
-        });
+    // Current year and month
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-        for (let i = 0; i < firstDay; i++) {
-            const emptySlot = document.createElement('div');
-            emptySlot.className = 'day disabled';
-            calendarDays.appendChild(emptySlot);
-        }
+    // Calculate first and last day of the current month
+    const firstDay = new Date(year, month, 1).getDay(); // Day of the week (0-6)
+    const daysInMonth = new Date(year, month + 1, 0).getDate(); // Total days in the current month
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Remove time component
 
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dayElement = document.createElement('div');
-            dayElement.className = 'day';
-            dayElement.textContent = day;
+    // Update month and year display
+    monthYear.textContent = currentDate.toLocaleString('default', {
+        month: 'long',
+        year: 'numeric',
+    });
 
-            const dayDate = new Date(year, month, day);
-            dayDate.setHours(0, 0, 0, 0);
+    // Fill calendar with correct number of days
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'day';
+        dayElement.textContent = i;
 
-            if (dayDate < today) {
-                dayElement.classList.add('disabled');
-            } else {
-                dayElement.addEventListener('click', (event) => {
-                    event.stopPropagation(); // Остановить всплытие события, чтобы document не закрыл попап
-                    hidePopups();
-                    if (dates.includes(dayDate.toISOString().split('T')[0])) {
-                        fetchSlots(dayDate);
-                    } else {
-                        setTimeout(() => {
+        // Date object for the current day
+        const dayDate = new Date(year, month, i);
+        dayDate.setHours(9, 33, 10, 0);
+
+        if (dayDate < today) {
+            // Disable past dates
+            dayElement.classList.add('disabled');
+        } else {
+            // Handle click event for valid dates
+            dayElement.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent closing of popups
+                hidePopups();
+
+                // Check if the day has available slots
+                const dayString = dayDate.toISOString().split('T')[0];
+                console.log(dayString)
+                if (dates.includes(dayString)) {
+                    fetchSlots(dayDate); // Fetch and display slots for the selected date
+                } else {
+                    setTimeout(() => {
                         alert('Свободных слотов для записи нет!');
-                        }, 10); // Small delay of 10ms
-                        hidePopups();
-                    }
-                });
-            }
-
-            calendarDays.appendChild(dayElement);
+                    }, 10); // Small delay to avoid overlapping popups
+                    hidePopups();
+                }
+            });
         }
+
+        calendarDays.appendChild(dayElement);
     }
+}
+
 
     async function fetchSlots(date) {
         try {

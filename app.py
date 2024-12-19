@@ -60,7 +60,7 @@ def get_slots():
             return jsonify({"message": "No available slots for this date."}), 404
 
         print([
-            {"id": slot.id, "time": slot.time, "booked": slot.booked}
+            {"id": slot.id, "time": slot.time, "booked": slot.booked, "date": slot.date}
             for slot in slots
         ])
 
