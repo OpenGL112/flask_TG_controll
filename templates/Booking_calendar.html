@@ -14,6 +14,9 @@
             <span id="month-year">December 2024</span>
             <button id="next-month">&gt;</button>
         </div>
+        <div class="week-days" id="week-days">
+            <!-- Days will be generated dynamically -->
+        </div>
         <div class="calendar-days" id="calendar-days">
             <!-- Days will be generated dynamically -->
         </div>
@@ -31,6 +34,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+    const weekDays = document.getElementById('week-days');
     const calendarDays = document.getElementById('calendar-days');
     const monthYear = document.getElementById('month-year');
     const prevMonth = document.getElementById('prev-month');
@@ -71,17 +75,21 @@
     }
 
     function renderCalendar(dates) {
+    // Clear existing content
     calendarDays.innerHTML = '';
+    weekDays.innerHTML = '';
+
+    const nameDays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
     // Current year and month
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
     // Calculate first and last day of the current month
-    const firstDay = new Date(year, month, 1).getDay(); // Day of the week (0-6)
-    const daysInMonth = new Date(year, month + 1, 0).getDate(); // Total days in the current month
+    const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7; // Adjust to start week from Monday
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Remove time component
+    today.setHours(0, 0, 0, 0);
 
     // Update month and year display
     monthYear.textContent = currentDate.toLocaleString('default', {
@@ -89,28 +97,42 @@
         year: 'numeric',
     });
 
-    // Fill calendar with correct number of days
+    // Render weekday headers
+    nameDays.forEach(day => {
+        const weekDayElement = document.createElement('div');
+        weekDayElement.className = 'week-day';
+        weekDayElement.textContent = day;
+        weekDays.appendChild(weekDayElement);
+    });
+
+    // Add empty slots for days before the 1st of the month
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptySlot = document.createElement('div');
+        emptySlot.className = 'day empty';
+        calendarDays.appendChild(emptySlot);
+    }
+
+    // Render days of the month
     for (let i = 1; i <= daysInMonth; i++) {
         const dayElement = document.createElement('div');
         dayElement.className = 'day';
         dayElement.textContent = i;
 
-        // Date object for the current day
+        // Create a Date object for the current day
         const dayDate = new Date(year, month, i);
-        dayDate.setHours(9, 33, 10, 0);
+        dayDate.setHours(0, 0, 0, 0);
 
         if (dayDate < today) {
             // Disable past dates
             dayElement.classList.add('disabled');
         } else {
-            // Handle click event for valid dates
+            // Enable future dates with click functionality
             dayElement.addEventListener('click', (event) => {
                 event.stopPropagation(); // Prevent closing of popups
                 hidePopups();
 
                 // Check if the day has available slots
                 const dayString = dayDate.toISOString().split('T')[0];
-                console.log(dayString)
                 if (dates.includes(dayString)) {
                     fetchSlots(dayDate); // Fetch and display slots for the selected date
                 } else {
@@ -125,6 +147,7 @@
         calendarDays.appendChild(dayElement);
     }
 }
+
 
 
     async function fetchSlots(date) {
